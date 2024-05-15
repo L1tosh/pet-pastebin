@@ -13,7 +13,7 @@ public class Post {
     @Column(name = "id")
     private Long id;
 
-    @NotNull
+    @NotNull(message = "Can't be empty")
     @Column(name = "title")
     private String title;
 
@@ -24,4 +24,14 @@ public class Post {
     @ManyToOne
     @JoinColumn(name = "owner", referencedColumnName = "id")
     private Person owner;
+
+    @Override
+    public String toString() {
+        return "Post{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", text='" + text + '\'' +
+                ", owner=" + owner +
+                '}';
+    }
 }
