@@ -13,6 +13,10 @@ public class Post {
     @Column(name = "id")
     private Long id;
 
+    @NotNull
+    @Column(name = "title")
+    private String title;
+
     @NotNull(message = "Can't be empty")
     @Column(name = "text")
     private String text;
