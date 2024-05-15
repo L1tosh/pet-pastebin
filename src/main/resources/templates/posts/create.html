@@ -15,6 +15,11 @@
     <textarea  th:field="*{text}" id="text" th:value="${post.text}"> </textarea>
     <div style="color: red" th:if="${#fields.hasErrors('text')}" th:errors="*{text}">ERROR</div>
     <br>
+    <label for="timeToDelete">time to delete:</label>
+    <input type="datetime-local"  step="300" min="00:00" max="23:55"
+           th:field="*{timeToDelete}" id="timeToDelete" th:value="${post.timeToDelete}"/>
+    <div style="color: red" th:if="${#fields.hasErrors('timeToDelete')}" th:errors="*{timeToDelete}">ERROR</div>
+    <br>
     <input type="submit" value="Submit">
 </form>
 </body>
