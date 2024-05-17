@@ -5,8 +5,13 @@
     <title>Posts</title>
 </head>
 <body>
-<div th:each="post : ${posts}">
-    <h2 th:text="${post.title}"></h2>
+<div>
+    <h1 th:text="${post.title}"></h1>
+    <h3 th:text="${'Time to delete: ' + post.timeToDelete}"></h3>
+    <h3 th:text="${post.owner.firstName + ': ' + post.owner.email}"></h3>
+    <h3 th:text="${'Hash:' + hash}"></h3>
+    <hr>
+    <br>
     <p th:text="${post.text}"></p>
 </div>
 </body>

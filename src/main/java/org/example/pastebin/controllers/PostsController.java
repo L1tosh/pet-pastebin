@@ -30,59 +30,55 @@ public class PostsController {
     private final ModelMapper modelMapper;
     private final PeopleService peopleService;
 
-    @GetMapping
-    public String showALl(Model model) {
-        model.addAttribute("posts", postsService.getAll());
-        return "posts/index";
-    }
-
     @GetMapping("/new")
-    public String newPost(@ModelAttribute("post") PostDTO post) {
+    public String showNewPostForm(@ModelAttribute("post") PostDTO post) {
         return "posts/create";
     }
 
+    @GetMapping("/{hash}")
+    public String showPost(@PathVariable("hash") String hash, Model model) {
+        model.addAttribute("post", postsService.getPostByHash(hash));
+
+        return "posts/index";
+    }
+
     @PostMapping
-    public String create(@ModelAttribute("post") @Valid PostDTO postDTO, BindingResult bindingResult) {
+    public String createPost(@ModelAttribute("post") @Valid PostDTO postDTO, BindingResult bindingResult) {
 
         if (bindingResult.hasErrors())
             return "posts/create";
 
-        postsService.create(fillPost(convertToPost(postDTO)));
+        String hash = postsService.createPost(fillPost(mapDtoToPost(postDTO)));
 
-        return "redirect:/post";
+        return "redirect:/post/" + hash;
     }
 
     @GetMapping("/{id}/edit")
-    public String change(@PathVariable("id") Long id, Model model) {
-        Optional<Post> post = postsService.getById(id);
+    public String showEditPostForm(@PathVariable("id") Long id, Model model) {
+        Post post = postsService.getPostById(id);
 
-        if (post.isEmpty())
-            throw new NotFoundException("Post not found");
-
-        model.addAttribute("post", convertToPostDTP(post.get()));
+        model.addAttribute("post", mapPostToDto(post));
 
         return "posts/edit";
     }
 
     @PostMapping("/{id}/edit")
-    public String edit(@PathVariable("id") Long id,
+    public String updatePost(@PathVariable("id") Long id,
                        @ModelAttribute("post") @Valid PostDTO postDTO, BindingResult bindingResult) {
 
         if (bindingResult.hasErrors())
             return "posts/edit";
 
-        System.out.println(postDTO);
-
-        postsService.edit(id, convertToPost(postDTO));
+        postsService.updatePost(id, mapDtoToPost(postDTO));
 
         return "redirect:/post";
     }
 
 
-    private Post convertToPost(PostDTO personDTO) {
+    private Post mapDtoToPost(PostDTO personDTO) {
         return modelMapper.map(personDTO, Post.class);
     }
-    private PostDTO convertToPostDTP(Post post) {
+    private PostDTO mapPostToDto(Post post) {
         return modelMapper.map(post, PostDTO.class);
     }
 
@@ -99,7 +95,7 @@ public class PostsController {
     }
 
     @ExceptionHandler
-    private ResponseEntity<ResponseError> handleException(NotFoundException exception) {
+    private ResponseEntity<ResponseError> handleNotFoundException(NotFoundException exception) {
         ResponseError response = new ResponseError(
                 exception.getMessage(),
                 System.currentTimeMillis()

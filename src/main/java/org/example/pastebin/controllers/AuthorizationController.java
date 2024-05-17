@@ -22,18 +22,18 @@ public class AuthorizationController {
     private final PersonValidator personValidator;
 
     @GetMapping("/login")
-    public String login() {
+    public String showLoginPage() {
      return "auth/login";
     }
 
     @GetMapping("/registration")
-    public String registration(@ModelAttribute("person") PersonDTO personDTO) {
+    public String showRegistrationPage(@ModelAttribute("person") PersonDTO personDTO) {
         return "auth/registration";
     }
 
     @PostMapping("/registration")
-    public String createNewPerson(@ModelAttribute("person") @Valid PersonDTO personDTO, BindingResult bindingResult) {
-        Person person = convertToUser(personDTO);
+    public String createPerson(@ModelAttribute("person") @Valid PersonDTO personDTO, BindingResult bindingResult) {
+        Person person = mapDtoToPerson(personDTO);
         personValidator.validate(person, bindingResult);
 
         if (bindingResult.hasErrors())
@@ -45,7 +45,7 @@ public class AuthorizationController {
     }
 
 
-    private Person convertToUser(PersonDTO personDTO) {
+    private Person mapDtoToPerson(PersonDTO personDTO) {
         return modelMapper.map(personDTO, Person.class);
     }
 }

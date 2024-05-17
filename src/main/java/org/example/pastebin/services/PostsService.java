@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -17,33 +16,55 @@ import java.util.Optional;
 public class PostsService {
 
     private final PostsRepository postsRepository;
+    private final GoogleCloudService googleCloudService;
 
-    public List<Post> getAll() {
-        return postsRepository.findAll();
+
+    public Post getPostById(Long id) {
+        return retrievePost(postsRepository.findById(id));
+    }
+
+    public Post getPostByHash(String hash) {
+        return retrievePost(postsRepository.findByText(hash));
     }
 
     @Transactional
-    public void create(Post post) {
+    public String createPost(Post post) {
+        String hash = generateAndUploadHash(post);
+        post.setText(hash);
         post.setCreatedDate(LocalDateTime.now());
         postsRepository.save(post);
-    }
-
-    public Optional<Post> getById(Long id) {
-        return postsRepository.findById(id);
+        return hash;
     }
 
     @Transactional
-    public void edit(Long id, Post post) {
-        Optional<Post> currentPost = postsRepository.findById(id);
-        
-        if (currentPost.isEmpty())
+    public void updatePost(Long id, Post post) {
+        Post postToUpdate = postsRepository.findById(id).orElseThrow(() ->
+                new NotFoundException("Post not found"));
+
+        googleCloudService.deleteFile(postToUpdate.getText());
+
+        String hash = generateAndUploadHash(post);
+
+        postToUpdate.setTitle(post.getTitle());
+        postToUpdate.setText(hash);
+
+        postsRepository.save(postToUpdate);
+    }
+
+    private Post retrievePost(Optional<Post> post) {
+        if (post.isEmpty())
             throw new NotFoundException("Post not found");
-        
-        Post postToEdit = currentPost.get();
 
-        postToEdit.setTitle(post.getTitle());
-        postToEdit.setText(post.getText());
+        Post postToFill = post.get();
 
-        postsRepository.save(postToEdit);
+        postToFill.setText(googleCloudService.downloadFile(postToFill.getText()));
+
+        return postToFill;
+    }
+
+    private String generateAndUploadHash(Post post) {
+        String hash = googleCloudService.generateHash(post.getText());
+        googleCloudService.uploadFile(hash, post.getText());
+        return hash;
     }
 }
