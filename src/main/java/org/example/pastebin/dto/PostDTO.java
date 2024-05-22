@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import org.checkerframework.common.aliasing.qual.Unique;
 
 import java.time.LocalDateTime;
 
@@ -19,7 +20,7 @@ public class PostDTO {
     private String title;
 
     @NotNull(message = "can't be empty")
-    @Column(name = "text")
+    @Column(name = "text", unique = true)
     private String text;
 
     @FutureOrPresent(message = "should be more then now")

@@ -3,11 +3,11 @@ package org.example.pastebin.services;
 import com.google.cloud.storage.*;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 
-@Component
+@Service
 public class GoogleCloudService {
 
     private final String bucketName;

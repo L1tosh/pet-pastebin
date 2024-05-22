@@ -23,6 +23,6 @@ public class PersonValidator implements Validator {
         Person person = (Person) target;
 
         if (peopleService.getByEmail(person.getEmail()).isPresent())
-            errors.rejectValue("email", "email already exist");
+            errors.rejectValue("email", "", "email already exist");
     }
 }

@@ -18,7 +18,6 @@ public class PostsService {
     private final PostsRepository postsRepository;
     private final GoogleCloudService googleCloudService;
 
-
     public Post getPostByHash(String hash) {
         return retrievePost(postsRepository.findByHash(hash));
     }
@@ -63,7 +62,7 @@ public class PostsService {
         postsRepository.delete(post);
     }
 
-    private Post retrievePost(Optional<Post> post) {
+    public Post retrievePost(Optional<Post> post) {
         if (post.isEmpty())
             throw new NotFoundException("Post not found");
 

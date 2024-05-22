@@ -7,6 +7,7 @@ import org.example.pastebin.model.Person;
 import org.example.pastebin.model.Post;
 import org.example.pastebin.services.PeopleService;
 import org.example.pastebin.services.PostsService;
+import org.example.pastebin.utill.PostValidator;
 import org.example.pastebin.utill.ResponseError;
 import org.example.pastebin.utill.exceptions.NotFoundException;
 import org.modelmapper.ModelMapper;
@@ -27,18 +28,13 @@ import java.util.Optional;
 public class PostsController {
 
     private final PostsService postsService;
-    private final ModelMapper modelMapper;
     private final PeopleService peopleService;
+    private final PostValidator postValidator;
+    private final ModelMapper modelMapper;
 
     @GetMapping
     public String showMainPage() {
         return "posts/main";
-    }
-
-
-    @GetMapping("/new")
-    public String showNewPostForm(@ModelAttribute("post") PostDTO post) {
-        return "posts/create";
     }
 
     @GetMapping("/{hash}")
@@ -48,8 +44,14 @@ public class PostsController {
         return "posts/index";
     }
 
+    @GetMapping("/new")
+    public String showNewPostForm(@ModelAttribute("post") PostDTO post) {
+        return "posts/create";
+    }
+
     @PostMapping
     public String createPost(@ModelAttribute("post") @Valid PostDTO postDTO, BindingResult bindingResult) {
+        postValidator.validate(mapDtoToPost(postDTO), bindingResult);
 
         if (bindingResult.hasErrors())
             return "posts/create";
@@ -71,6 +73,7 @@ public class PostsController {
     @PostMapping("/{hash}/edit")
     public String updatePost(@PathVariable("hash") String hash,
                        @ModelAttribute("post") @Valid PostDTO postDTO, BindingResult bindingResult) {
+        postValidator.validate(mapDtoToPost(postDTO), bindingResult);
 
         if (bindingResult.hasErrors())
             return "posts/edit";

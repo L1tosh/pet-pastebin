@@ -23,9 +23,8 @@ public class Post {
     @Column(name = "title")
     private String title;
 
-    @Unique
     @NotNull(message = "Can't be empty")
-    @Column(name = "hash")
+    @Column(name = "hash", unique = true)
     private String hash;
 
     @NotNull(message = "Can't be empty")
