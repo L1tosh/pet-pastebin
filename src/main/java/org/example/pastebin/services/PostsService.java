@@ -20,29 +20,34 @@ public class PostsService {
 
 
     public Post getPostByHash(String hash) {
-        return retrievePost(postsRepository.findByText(hash));
+        return retrievePost(postsRepository.findByHash(hash));
     }
 
     @Transactional
     public String createPost(Post post) {
         String hash = generateAndUploadHash(post);
-        post.setText(hash);
+
+        post.setHash(hash);
+        post.setText(post.getText().substring(0, Math.min(128, post.getText().length())) + "...");
         post.setCreatedDate(LocalDateTime.now());
+
         postsRepository.save(post);
+
         return hash;
     }
 
     @Transactional
     public String updatePost(String hash, Post post) {
-        Post postToUpdate = postsRepository.findByText(hash).orElseThrow(() ->
+        Post postToUpdate = postsRepository.findByHash(hash).orElseThrow(() ->
                 new NotFoundException("Post not found"));
 
-        googleCloudService.deleteFile(postToUpdate.getText());
+        googleCloudService.deleteFile(postToUpdate.getHash());
 
         String newHash = generateAndUploadHash(post);
 
+        postToUpdate.setHash(newHash);
         postToUpdate.setTitle(post.getTitle());
-        postToUpdate.setText(newHash);
+        post.setText(post.getText().substring(0, Math.min(128, post.getText().length())) + "...");
 
         postsRepository.save(postToUpdate);
 
@@ -51,7 +56,7 @@ public class PostsService {
 
     @Transactional
     public void deletePost(String hash) {
-        Post post = postsRepository.findByText(hash).orElseThrow(() ->
+        Post post = postsRepository.findByHash(hash).orElseThrow(() ->
                 new NotFoundException("Post not found"));
 
         googleCloudService.deleteFile(hash);
@@ -64,7 +69,7 @@ public class PostsService {
 
         Post postToFill = post.get();
 
-        postToFill.setText(googleCloudService.downloadFile(postToFill.getText()));
+        postToFill.setText(googleCloudService.downloadFile(postToFill.getHash()));
 
         return postToFill;
     }

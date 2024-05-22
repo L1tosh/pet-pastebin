@@ -9,5 +9,5 @@ import java.util.Optional;
 
 public interface PostsRepository extends JpaRepository<Post, Long> {
     List<Post> findByTimeToDeleteBefore(LocalDateTime localDateTime);
-    Optional<Post> findByText(String text);
+    Optional<Post> findByHash(String hash);
 }
