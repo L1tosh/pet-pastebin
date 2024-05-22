@@ -30,6 +30,12 @@ public class PostsController {
     private final ModelMapper modelMapper;
     private final PeopleService peopleService;
 
+    @GetMapping
+    public String showMainPage() {
+        return "posts/main";
+    }
+
+
     @GetMapping("/new")
     public String showNewPostForm(@ModelAttribute("post") PostDTO post) {
         return "posts/create";
@@ -53,25 +59,31 @@ public class PostsController {
         return "redirect:/post/" + hash;
     }
 
-    @GetMapping("/{id}/edit")
-    public String showEditPostForm(@PathVariable("id") Long id, Model model) {
-        Post post = postsService.getPostById(id);
+    @GetMapping("/{hash}/edit")
+    public String showEditPostForm(@PathVariable("hash") String hash, Model model) {
+        Post post = postsService.getPostByHash(hash);
 
         model.addAttribute("post", mapPostToDto(post));
 
         return "posts/edit";
     }
 
-    @PostMapping("/{id}/edit")
-    public String updatePost(@PathVariable("id") Long id,
+    @PostMapping("/{hash}/edit")
+    public String updatePost(@PathVariable("hash") String hash,
                        @ModelAttribute("post") @Valid PostDTO postDTO, BindingResult bindingResult) {
 
         if (bindingResult.hasErrors())
             return "posts/edit";
 
-        postsService.updatePost(id, mapDtoToPost(postDTO));
+        String newHash = postsService.updatePost(hash, mapDtoToPost(postDTO));
 
-        return "redirect:/post";
+        return "redirect:/post/" + newHash;
+    }
+
+    @PostMapping("/{hash}/delete")
+    public String deletePost(@PathVariable("hash") String hash) {
+        postsService.deletePost(hash);
+        return "redirect:/post/new";
     }
 
 

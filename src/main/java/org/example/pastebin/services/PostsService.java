@@ -19,10 +19,6 @@ public class PostsService {
     private final GoogleCloudService googleCloudService;
 
 
-    public Post getPostById(Long id) {
-        return retrievePost(postsRepository.findById(id));
-    }
-
     public Post getPostByHash(String hash) {
         return retrievePost(postsRepository.findByText(hash));
     }
@@ -37,18 +33,29 @@ public class PostsService {
     }
 
     @Transactional
-    public void updatePost(Long id, Post post) {
-        Post postToUpdate = postsRepository.findById(id).orElseThrow(() ->
+    public String updatePost(String hash, Post post) {
+        Post postToUpdate = postsRepository.findByText(hash).orElseThrow(() ->
                 new NotFoundException("Post not found"));
 
         googleCloudService.deleteFile(postToUpdate.getText());
 
-        String hash = generateAndUploadHash(post);
+        String newHash = generateAndUploadHash(post);
 
         postToUpdate.setTitle(post.getTitle());
-        postToUpdate.setText(hash);
+        postToUpdate.setText(newHash);
 
         postsRepository.save(postToUpdate);
+
+        return newHash;
+    }
+
+    @Transactional
+    public void deletePost(String hash) {
+        Post post = postsRepository.findByText(hash).orElseThrow(() ->
+                new NotFoundException("Post not found"));
+
+        googleCloudService.deleteFile(hash);
+        postsRepository.delete(post);
     }
 
     private Post retrievePost(Optional<Post> post) {

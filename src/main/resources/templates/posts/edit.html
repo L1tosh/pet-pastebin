@@ -5,7 +5,7 @@
     <title>Edit</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
-<form th:action="@{/post/{id}/edit(id=${id})}" th:method="POST" th:object="${post}" class="form__group field">
+<form th:action="@{/post/{hash}/edit(hash=${hash})}" th:method="POST" th:object="${post}" class="form__group field">
     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 
     <label class="form__label" for="title">title:</label>
