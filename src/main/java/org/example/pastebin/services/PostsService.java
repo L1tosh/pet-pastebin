@@ -46,7 +46,7 @@ public class PostsService {
 
         postToUpdate.setHash(newHash);
         postToUpdate.setTitle(post.getTitle());
-        post.setText(post.getText().substring(0, Math.min(128, post.getText().length())) + "...");
+        postToUpdate.setText(post.getText().substring(0, Math.min(128, post.getText().length())) + "...");
 
         postsRepository.save(postToUpdate);
 
