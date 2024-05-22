@@ -3,31 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <title>Registration</title>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-<form th:action="@{/registration}" th:method="POST" th:object="${person}">
+<form class="form__group field" th:action="@{/registration}" th:method="POST" th:object="${person}">
     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-    <label for="firstName">firstName:</label>
-    <input type="text" th:field="*{firstName}" id="firstName" th:value="${person.firstName}">
-    <div style="color: red" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}">ERROR</div>
+    <label class="form__label" for="firstName">firstName:</label>
+    <input class="form__field" type="text" th:field="*{firstName}" id="firstName" th:value="${person.firstName}">
+    <div class="error" style="color: red" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}">ERROR</div>
     <br>
-    <label for="lastName">lastName:</label>
-    <input type="text" th:field="*{lastName}" id="lastName" th:value="${person.lastName}">
-    <div style="color: red" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}">ERROR</div>
+    <label class="form__label" for="lastName">lastName:</label>
+    <input class="form__field" type="text" th:field="*{lastName}" id="lastName" th:value="${person.lastName}">
+    <div class="error"  style="color: red" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}">ERROR</div>
     <br>
-    <label for="email">email:</label>
-    <input type="email" th:field="*{email}" id="email" th:value="${person.email}">
-    <div style="color: red" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">ERROR</div>
+    <label class="form__label" for="email">email:</label>
+    <input class="form__field" type="email" th:field="*{email}" id="email" th:value="${person.email}">
+    <div class="error"  style="color: red" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">ERROR</div>
     <br>
-    <label for="dateOfBirth">dateOfBirth:</label>
-    <input type="date" th:field="*{dateOfBirth}" id="dateOfBirth" th:value="${person.dateOfBirth}">
-    <div style="color: red" th:if="${#fields.hasErrors('dateOfBirth')}" th:errors="*{dateOfBirth}">ERROR</div>
+    <label class="form__label" for="dateOfBirth">dateOfBirth:</label>
+    <input class="form__field" type="date" th:field="*{dateOfBirth}" id="dateOfBirth" th:value="${person.dateOfBirth}">
+    <div class="error"  style="color: red" th:if="${#fields.hasErrors('dateOfBirth')}" th:errors="*{dateOfBirth}">ERROR</div>
     <br>
-    <label for="password">password:</label>
-    <input type="password" th:field="*{password}" id="password" th:value="${person.password}">
-    <div style="color: red" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">ERROR</div>
+    <label class="form__label" for="password">password:</label>
+    <input class="form__field" type="password" th:field="*{password}" id="password" th:value="${person.password}">
+    <div class="error"  style="color: red" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">ERROR</div>
     <br>
-    <input type="submit" value="Submit">
+    <input class="form__field" type="submit" value="Submit">
 </form>
 </body>
 </html>

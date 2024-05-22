@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Posts</title>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 <div>
@@ -10,7 +11,6 @@
     <h3 th:text="${'Time to delete: ' + post.timeToDelete}"></h3>
     <h3 th:text="${post.owner.firstName + ': ' + post.owner.email}"></h3>
     <h3 th:text="${'Hash:' + hash}"></h3>
-    <hr>
     <br>
     <p th:text="${post.text}"></p>
 </div>

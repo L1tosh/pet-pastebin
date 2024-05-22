@@ -3,20 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <title>Login</title>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-<form action="/process_login" method="post" name="f">
-    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-    <label for="username">Input email: </label>
-    <input type="text" name="username" id="username">
+<form class="form__group field" action="/process_login" method="post" name="f">
+    <input  type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+    <label class="form__label" for="username">Input email: </label>
+    <input class="form__field" type="text" name="username" id="username">
     <br>
-    <label for="password">Input your password: </label>
-    <input type="password" name="password" id="password">
+    <label class="form__label" for="password">Input your password: </label>
+    <input class="form__field" type="password" name="password" id="password">
     <br>
-    <input type="submit" value="Login">
+    <input class="form__field" type="submit" value="Login">
 
 
-    <div th:if="${param.error}" style="color : red;">
+    <div class="error" th:if="${param.error}" style="color : red;">
         Incorrect username or password
     </div>
 </form>
