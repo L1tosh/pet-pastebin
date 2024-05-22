@@ -1,13 +1,16 @@
 package org.example.pastebin.services;
 
 import lombok.AllArgsConstructor;
+import org.example.pastebin.model.Person;
 import org.example.pastebin.model.Post;
 import org.example.pastebin.repositories.PostsRepository;
 import org.example.pastebin.utill.exceptions.NotFoundException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -16,6 +19,7 @@ import java.util.Optional;
 public class PostsService {
 
     private final PostsRepository postsRepository;
+    private final PeopleService peopleService;
     private final GoogleCloudService googleCloudService;
 
     public Post getPostByHash(String hash) {
@@ -77,5 +81,14 @@ public class PostsService {
         String hash = googleCloudService.generateHash(post.getText());
         googleCloudService.uploadFile(hash, post.getText());
         return hash;
+    }
+
+    public List<Post> getAll(String email) throws AuthenticationException {
+        Optional<Person> owner = peopleService.getByEmail(email);
+
+        if (owner.isEmpty())
+            throw new RuntimeException("User not authenticate");
+
+        return postsRepository.findByOwner(owner.get());
     }
 }

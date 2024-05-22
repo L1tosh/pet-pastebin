@@ -57,5 +57,5 @@ build/
 
 ### VS Code ###
 .vscode/
-/src/main/resources/templates/users.html
+/src/main/resources/templates/users/users.html
 >>>>>>> d6ee978 (first commit)

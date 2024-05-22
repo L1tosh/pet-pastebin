@@ -23,6 +23,8 @@ public class PostDTO {
     @Column(name = "text", unique = true)
     private String text;
 
+    private String hash;
+
     @FutureOrPresent(message = "should be more then now")
     @NotNull(message = "can't be empty")
     @Temporal(value = TemporalType.DATE)

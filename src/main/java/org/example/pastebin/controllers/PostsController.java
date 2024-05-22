@@ -89,6 +89,12 @@ public class PostsController {
         return "redirect:/post/new";
     }
 
+    @GetMapping("/show")
+    public String showPageWithAllMyPost(Model model) {
+        model.addAttribute("posts", postsService.getAll(SecurityContextHolder.getContext().getAuthentication().getName()));
+        return "posts/allPosts";
+    }
+
 
     private Post mapDtoToPost(PostDTO personDTO) {
         return modelMapper.map(personDTO, Post.class);
@@ -109,6 +115,7 @@ public class PostsController {
         return post;
     }
 
+    // :todo make error page and show
     @ExceptionHandler
     private ResponseEntity<ResponseError> handleNotFoundException(NotFoundException exception) {
         ResponseError response = new ResponseError(

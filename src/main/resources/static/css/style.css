@@ -1,15 +1,15 @@
 :root{
-    --primary: #11998e;
-    --secondary: #38ef7d;
-    --white: #fff;
-    --gray: #9b9b9b;
+  --primary: #11998e;
+  --secondary: #38ef7d;
+  --white: #fff;
+  --gray: #9b9b9b;
 }
 
 .form__group {
-    position: relative;
-    padding: 15px 0 0;
-    margin-top: 10px;
-    width: 50%;
+  position: relative;
+  padding: 15px 0 0;
+  margin-top: 10px;
+  width: 100%;
 }
 
 .form__field {
@@ -62,15 +62,47 @@ body {
   font-family: "Poppins", sans-serif;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  min-height: 100vh;
+  height: 100%;
   font-size: 1.5rem;
   background-color: #222222;
   color: var(--primary);
+  width: 100%;
+  min-width: 1024px;
+  padding-top: 80px;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 1024px;
+  width: 100%;
+  position: relative;
+  padding: 15px 0 0;
+  margin-top: 10px;
 }
 
 a {
   text-decoration: none;
   color: var(--primary);
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--secondary);
+}
+
+.list {
+  border: 1px solid var(--secondary);
+  padding: 14px;
+  margin: 12px;
+}
+
+.list-item {
+  margin: 12px;
+}
+
+.title {
+  text-align: center;
 }

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>posts</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<main>
+    <div th:each="post : ${posts}" class="list">
+        <div class="list-item title"><a th:href="${'/post/' + post.hash}" th:text="${post.title}"></a></div>
+        <div class="list-item" th:text="${post.text}"></div>
+    </div>
+</main>
+</body>
+</html>

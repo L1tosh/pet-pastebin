@@ -6,8 +6,15 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-<a href="/login">login</a>
-<a href="/registration">registration</a>
-<a href="/post/new">new</a>
+<main>
+    <a href="/login">login</a>
+    <a href="/registration">registration</a>
+    <a href="/post/new">new post</a>
+    <a href="/post/show">show my post</a>
+    <form th:action="@{/logout}" th:method="POST">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <input class="form__field" type="submit" value="logout">
+    </form>
+</main>
 </body>
 </html>
