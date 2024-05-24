@@ -7,7 +7,13 @@
 </head>
 <body>
 <main>
-    <div th:each="post : ${posts}" class="list">
+    <h1>My posts</h1>
+    <div th:each="post : ${myPosts}" class="list">
+        <div class="list-item title"><a th:href="${'/post/' + post.hash}" th:text="${post.title}"></a></div>
+        <div class="list-item" th:text="${post.text}"></div>
+    </div>
+    <h1>Sharing posts</h1>
+    <div th:each="post : ${sharingPosts}" class="list">
         <div class="list-item title"><a th:href="${'/post/' + post.hash}" th:text="${post.title}"></a></div>
         <div class="list-item" th:text="${post.text}"></div>
     </div>

@@ -9,11 +9,13 @@ import org.example.pastebin.model.enums.Role;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Entity
-@Table(name = "users")
+@Table(name = "people")
 public class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,4 +48,7 @@ public class Person {
 
     @OneToMany(mappedBy = "owner")
     private List<Post> posts;
+
+    @ManyToMany(mappedBy = "accessibleUsers")
+    private Set<Post> accessiblePosts = new HashSet<>();
 }

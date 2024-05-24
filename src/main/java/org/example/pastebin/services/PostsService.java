@@ -3,15 +3,17 @@ package org.example.pastebin.services;
 import lombok.AllArgsConstructor;
 import org.example.pastebin.model.Person;
 import org.example.pastebin.model.Post;
+import org.example.pastebin.model.PostAccess;
+import org.example.pastebin.repositories.PostAccessRepository;
 import org.example.pastebin.repositories.PostsRepository;
 import org.example.pastebin.utill.exceptions.NotFoundException;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -19,11 +21,19 @@ import java.util.Optional;
 public class PostsService {
 
     private final PostsRepository postsRepository;
-    private final PeopleService peopleService;
+    private final PostAccessRepository postAccessRepository;
     private final GoogleCloudService googleCloudService;
 
     public Post getPostByHash(String hash) {
         return retrievePost(postsRepository.findByHash(hash));
+    }
+    public List<Post> getPostsAccessibleByPerson(Person person) {
+        return postAccessRepository.findByPerson(person).stream()
+                .map(PostAccess::getPost)
+                .collect(Collectors.toList());
+    }
+    public List<Post> getPostsByPerson(Person person) {
+        return postsRepository.findByOwner(person);
     }
 
     @Transactional
@@ -42,7 +52,7 @@ public class PostsService {
     @Transactional
     public String updatePost(String hash, Post post) {
         Post postToUpdate = postsRepository.findByHash(hash).orElseThrow(() ->
-                new NotFoundException("Post not found"));
+                new NotFoundException("post not found"));
 
         googleCloudService.deleteFile(postToUpdate.getHash());
 
@@ -60,15 +70,31 @@ public class PostsService {
     @Transactional
     public void deletePost(String hash) {
         Post post = postsRepository.findByHash(hash).orElseThrow(() ->
-                new NotFoundException("Post not found"));
+                new NotFoundException("post not found"));
 
         googleCloudService.deleteFile(hash);
         postsRepository.delete(post);
     }
 
+    @Transactional
+    public void grantAccessToPost(Person person, String postHash) {
+        Post post = postsRepository.findByHash(postHash).orElseThrow(
+                () -> new NotFoundException("post now found"));
+
+        if (person.equals(post.getOwner()))
+            throw new RuntimeException("sending post to owner");
+
+        PostAccess postAccess = new PostAccess();
+
+        postAccess.setPost(post);
+        postAccess.setPerson(person);
+
+        postAccessRepository.save(postAccess);
+    }
+
     public Post retrievePost(Optional<Post> post) {
         if (post.isEmpty())
-            throw new NotFoundException("Post not found");
+            throw new NotFoundException("post not found");
 
         Post postToFill = post.get();
 
@@ -83,12 +109,5 @@ public class PostsService {
         return hash;
     }
 
-    public List<Post> getAll(String email) throws AuthenticationException {
-        Optional<Person> owner = peopleService.getByEmail(email);
 
-        if (owner.isEmpty())
-            throw new RuntimeException("User not authenticate");
-
-        return postsRepository.findByOwner(owner.get());
-    }
 }

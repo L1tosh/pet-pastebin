@@ -9,6 +9,8 @@ import org.hibernate.annotations.TimeZoneColumn;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Entity
@@ -40,6 +42,16 @@ public class Post {
     private LocalDateTime timeToDelete;
 
     @ManyToOne
-    @JoinColumn(name = "owner", referencedColumnName = "id")
+    @JoinColumn(
+            name = "owner_id",
+            referencedColumnName = "id",
+            nullable = false)
     private Person owner;
+
+    @ManyToMany
+    @JoinTable(
+            name = "post_access",
+            joinColumns = @JoinColumn(name = "post_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id"))
+    private Set<Person> accessibleUsers = new HashSet<>();
 }
