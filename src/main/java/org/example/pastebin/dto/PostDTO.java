@@ -6,6 +6,7 @@ import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import org.example.pastebin.model.Person;
 
 import java.time.LocalDateTime;
 
@@ -25,4 +26,6 @@ public class PostDTO {
     @NotNull(message = "can't be empty")
     @Temporal(value = TemporalType.DATE)
     private LocalDateTime timeToDelete;
+
+    private Person owner;
 }

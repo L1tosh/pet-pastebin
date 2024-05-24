@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Post</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<main>
+    <div>
+        <h1 th:text="${post.title}"></h1>
+        <h3 th:text="${'Time to delete: ' + post.timeToDelete}"></h3>
+        <h3 th:text="${post.owner.firstName + ': ' + post.owner.email}"></h3>
+        <h3 th:text="${'Hash:' + hash}"></h3>
+        <br>
+        <p th:text="${post.text}"></p>
+    </div>
+</main>
+</body>
+</html>

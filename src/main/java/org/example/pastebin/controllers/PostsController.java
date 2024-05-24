@@ -39,8 +39,13 @@ public class PostsController {
     }
 
     @GetMapping("/{hash}")
-    public String showPost(@PathVariable("hash") String hash, Model model) {
-        model.addAttribute("post", postsService.getPostByHash(hash));
+    public String showPost(@PathVariable("hash") String hash, Principal principal, Model model) {
+        Post post = postsService.getPostByHash(hash);
+        model.addAttribute("post",  mapPostToDto(post));
+
+        if (principal == null || !principal.getName().equals(post.getOwner().getEmail()))
+            return "posts/to-guest";
+
         return "posts/index";
     }
 
@@ -59,9 +64,8 @@ public class PostsController {
     }
 
     @GetMapping("/show")
-    public String showPageWithAllAccessPosts(Model model) {
-        Optional<Person> person = peopleService.getByEmail(
-                SecurityContextHolder.getContext().getAuthentication().getName());
+    public String showPageWithAllAccessPosts(Model model, Principal principal) {
+        Optional<Person> person = peopleService.getByEmail(principal.getName());
 
         if (person.isEmpty())
             throw new NotFoundException("User doesn't authenticate");
