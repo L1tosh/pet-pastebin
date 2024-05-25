@@ -7,12 +7,13 @@ import org.example.pastebin.model.PostAccess;
 import org.example.pastebin.repositories.PostAccessRepository;
 import org.example.pastebin.repositories.PostsRepository;
 import org.example.pastebin.utill.exceptions.NotFoundException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,17 +24,32 @@ public class PostsService {
     private final PostsRepository postsRepository;
     private final PostAccessRepository postAccessRepository;
     private final GoogleCloudService googleCloudService;
+    private final RestTemplate restTemplate;
+
+    public List<Post> getPostsByPerson(Person person) {
+        return postsRepository.findByOwner(person);
+    }
+
+    public Post findPostByHashOrThrow(String hash) {
+        return postsRepository.findByHash(hash).orElseThrow(() ->
+                new NotFoundException("Post not found with hash: " + hash));
+    }
 
     public Post getPostByHash(String hash) {
-        return retrievePost(postsRepository.findByHash(hash));
+        try {
+            return retrievePost(findPostByHashOrThrow(hash));
+        } catch (NotFoundException e) {
+            Long postId = getPostIdFromShortUrlService(hash);
+            return postsRepository.findById(postId)
+                    .map(this::retrievePost)
+                    .orElseThrow(() -> new NotFoundException("Post not found with id: " + postId));
+        }
     }
+
     public List<Post> getPostsAccessibleByPerson(Person person) {
         return postAccessRepository.findByPerson(person).stream()
                 .map(PostAccess::getPost)
                 .collect(Collectors.toList());
-    }
-    public List<Post> getPostsByPerson(Person person) {
-        return postsRepository.findByOwner(person);
     }
 
     @Transactional
@@ -41,7 +57,7 @@ public class PostsService {
         String hash = generateAndUploadHash(post);
 
         post.setHash(hash);
-        post.setText(post.getText().substring(0, Math.min(128, post.getText().length())) + "...");
+        post.setText(post.getText().substring(0, Math.min(128, post.getText().length())));
         post.setCreatedDate(LocalDateTime.now());
 
         postsRepository.save(post);
@@ -51,8 +67,7 @@ public class PostsService {
 
     @Transactional
     public String updatePost(String hash, Post post) {
-        Post postToUpdate = postsRepository.findByHash(hash).orElseThrow(() ->
-                new NotFoundException("post not found"));
+        Post postToUpdate = findPostByHashOrThrow(hash);
 
         googleCloudService.deleteFile(postToUpdate.getHash());
 
@@ -60,7 +75,7 @@ public class PostsService {
 
         postToUpdate.setHash(newHash);
         postToUpdate.setTitle(post.getTitle());
-        postToUpdate.setText(post.getText().substring(0, Math.min(128, post.getText().length())) + "...");
+        postToUpdate.setText(post.getText().substring(0, Math.min(128, post.getText().length())));
 
         postsRepository.save(postToUpdate);
 
@@ -69,20 +84,21 @@ public class PostsService {
 
     @Transactional
     public void deletePost(String hash) {
-        Post post = postsRepository.findByHash(hash).orElseThrow(() ->
-                new NotFoundException("post not found"));
+        Post post = findPostByHashOrThrow(hash);
 
+        deleteShortUrl(post.getId());
         googleCloudService.deleteFile(hash);
         postsRepository.delete(post);
     }
 
     @Transactional
-    public void grantAccessToPost(Person person, String postHash) {
-        Post post = postsRepository.findByHash(postHash).orElseThrow(
-                () -> new NotFoundException("post now found"));
+    public void grantAccessToPost(Person person, String hash) {
+        Post post = findPostByHashOrThrow(hash);
 
         if (person.equals(post.getOwner()))
-            throw new RuntimeException("sending post to owner");
+            throw new RuntimeException(String.format(
+                    "User with id={%d} is trying to send a post to user with id={%d}",
+                    person.getId(), post.getOwner().getId()));
 
         PostAccess postAccess = new PostAccess();
 
@@ -92,14 +108,42 @@ public class PostsService {
         postAccessRepository.save(postAccess);
     }
 
-    public Post retrievePost(Optional<Post> post) {
-        if (post.isEmpty())
-            throw new NotFoundException("post not found");
+    public String createShortUrl(String hash) {
+        Post post = findPostByHashOrThrow(hash);
+        String shortUrlService = "http://localhost:8081/api/create";
+        return postForEntity(shortUrlService, post.getId(), String.class);
+    }
 
-        Post postToFill = post.get();
+    private Long getPostIdFromShortUrlService(String hash) {
+        String shortUrlService = "http://localhost:8081/api/get?url={shortUrl}";
+        return getForEntity(shortUrlService, Long.class, hash);
+    }
 
+    private Boolean deleteShortUrl(Long postId) {
+        String shortUrlService = "http://localhost:8081/api/delete";
+        return postForEntity(shortUrlService, postId, Boolean.class);
+    }
+
+    private <T> T getForEntity(String url, Class<T> responseType, Object... uriVariables) {
+        ResponseEntity<T> response = restTemplate.getForEntity(url, responseType, uriVariables);
+        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+            return response.getBody();
+        } else {
+            throw new NotFoundException("Resource not found for URL: " + url);
+        }
+    }
+
+    private <T> T postForEntity(String url, Object request, Class<T> responseType) {
+        ResponseEntity<T> response = restTemplate.postForEntity(url, request, responseType);
+        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+            return response.getBody();
+        } else {
+            throw new NotFoundException("Resource not found for URL: " + url);
+        }
+    }
+
+    private Post retrievePost(Post postToFill) {
         postToFill.setText(googleCloudService.downloadFile(postToFill.getHash()));
-
         return postToFill;
     }
 

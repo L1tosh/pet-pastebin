@@ -123,6 +123,13 @@ public class PostsController {
         return String.format("redirect:/post/%s", hash);
     }
 
+    // :todo mapping short url
+    @PostMapping("/{hash}/create-short-url")
+    public String createShortUrl(@PathVariable("hash") String hash, Model model) {
+        model.addAttribute("shortUrl", postsService.createShortUrl(hash));
+        return "posts/short-url";
+    }
+
 
     private Post mapDtoToPost(PostDTO personDTO) {
         return modelMapper.map(personDTO, Post.class);
