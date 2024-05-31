@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import org.example.pastebin.dto.PersonDTO;
 import org.example.pastebin.model.Person;
 import org.example.pastebin.services.PeopleService;
-import org.example.pastebin.utill.PersonValidator;
+import org.example.pastebin.utill.validators.PersonValidator;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;

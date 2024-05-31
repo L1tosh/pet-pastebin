@@ -47,11 +47,4 @@ public class Post {
             referencedColumnName = "id",
             nullable = false)
     private Person owner;
-
-    @ManyToMany
-    @JoinTable(
-            name = "post_access",
-            joinColumns = @JoinColumn(name = "post_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private Set<Person> accessibleUsers = new HashSet<>();
 }

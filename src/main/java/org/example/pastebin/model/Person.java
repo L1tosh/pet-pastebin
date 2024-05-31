@@ -48,7 +48,4 @@ public class Person {
 
     @OneToMany(mappedBy = "owner")
     private List<Post> posts;
-
-    @ManyToMany(mappedBy = "accessibleUsers")
-    private Set<Post> accessiblePosts = new HashSet<>();
 }

@@ -1,4 +1,4 @@
-package org.example.pastebin.utill;
+package org.example.pastebin.utill.validators;
 
 import lombok.AllArgsConstructor;
 import org.example.pastebin.model.Post;

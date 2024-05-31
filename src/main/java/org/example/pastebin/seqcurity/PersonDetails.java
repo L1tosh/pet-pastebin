@@ -1,5 +1,6 @@
 package org.example.pastebin.seqcurity;
 
+import lombok.Getter;
 import org.example.pastebin.model.Person;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -8,12 +9,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
 
-public class PersonDetails implements UserDetails {
-    private final Person person;
-
-    public PersonDetails(Person person) {
-        this.person = person;
-    }
+@Getter
+public record PersonDetails(Person person) implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -50,7 +47,4 @@ public class PersonDetails implements UserDetails {
         return true;
     }
 
-    public Person getPerson() {
-        return this.person;
-    }
 }

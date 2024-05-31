@@ -7,7 +7,8 @@ import org.example.pastebin.model.Person;
 import org.example.pastebin.model.Post;
 import org.example.pastebin.services.PeopleService;
 import org.example.pastebin.services.PostsService;
-import org.example.pastebin.utill.PostValidator;
+import org.example.pastebin.services.ShortUrlService;
+import org.example.pastebin.utill.validators.PostValidator;
 import org.example.pastebin.utill.ResponseError;
 import org.example.pastebin.utill.exceptions.NotFoundException;
 import org.modelmapper.ModelMapper;
@@ -29,6 +30,7 @@ import java.util.Optional;
 public class PostsController {
 
     private final PostsService postsService;
+    private final ShortUrlService shortUrlService;
     private final PeopleService peopleService;
     private final PostValidator postValidator;
     private final ModelMapper modelMapper;
@@ -113,7 +115,6 @@ public class PostsController {
         Optional<Person> person = peopleService.getByEmail(email);
 
         if (person.isEmpty()) {
-            // :todo redirect to error page
             model.addAttribute("error", "User with this email not exist");
             return String.format("redirect:/post/%s", hash);
         }
@@ -123,10 +124,9 @@ public class PostsController {
         return String.format("redirect:/post/%s", hash);
     }
 
-    // :todo mapping short url
     @PostMapping("/{hash}/create-short-url")
     public String createShortUrl(@PathVariable("hash") String hash, Model model) {
-        model.addAttribute("shortUrl", postsService.createShortUrl(hash));
+        model.addAttribute("shortUrl", shortUrlService.createShortUrl(hash));
         return "posts/short-url";
     }
 
