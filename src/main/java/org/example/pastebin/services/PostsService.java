@@ -29,6 +29,7 @@ public class PostsService {
     private final RedisService<String, Post> redisService;
 
     private static final long TTL_TIME = 300L;
+    private static final byte SHORT_URL_LENGTH = 8;
 
     public List<Post> getPostsByPerson(Person person) {
         return postsRepository.findByOwner(person);
@@ -43,11 +44,10 @@ public class PostsService {
         Post post = redisService.get(hash);
 
         if (post == null) {
-            try {
-                post = retrievePost(findPostByHashOrThrow(hash));
-            } catch (NotFoundException e) {
-                post = retrievePost(findPostByHashOrThrow(shortUrlService.getHash(hash)));
-            }
+            if (hash.length() == SHORT_URL_LENGTH)
+                post = findPostByHashOrThrow(shortUrlService.getHash(hash));
+            else
+                post = findPostByHashOrThrow(hash);
         }
 
         post.getOwner().setPosts(null); // Prevent lazy loading issues
@@ -106,7 +106,7 @@ public class PostsService {
      * Grants access to a post to a specified person.
      *
      * @param person the person to grant access to
-     * @param hash the hash of the post
+     * @param hash   the hash of the post
      */
     @Transactional
     public void grantAccessToPost(Person person, String hash) {
@@ -152,6 +152,6 @@ public class PostsService {
         post.setText(trimText(post.getText()));
         post.setCreatedDate(LocalDateTime.now());
     }
-    
+
 
 }

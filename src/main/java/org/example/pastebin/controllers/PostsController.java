@@ -152,15 +152,4 @@ public class PostsController {
 
         return post;
     }
-
-    // :todo make error page
-    @ExceptionHandler
-    private ResponseEntity<ResponseError> handleNotFoundException(NotFoundException exception) {
-        ResponseError response = new ResponseError(
-                exception.getMessage(),
-                System.currentTimeMillis()
-        );
-
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-    }
 }
