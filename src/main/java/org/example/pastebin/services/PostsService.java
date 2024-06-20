@@ -6,8 +6,8 @@ import org.example.pastebin.model.Post;
 import org.example.pastebin.model.PostAccess;
 import org.example.pastebin.repositories.PostAccessRepository;
 import org.example.pastebin.repositories.PostsRepository;
-import org.example.pastebin.utill.exceptions.IllegalAccessAttemptException;
-import org.example.pastebin.utill.exceptions.NotFoundException;
+import org.example.pastebin.exceptions.IllegalAccessAttemptException;
+import org.example.pastebin.exceptions.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +45,7 @@ public class PostsService {
 
         if (post == null) {
             if (hash.length() == SHORT_URL_LENGTH)
+                // не нрав
                 post = findPostByHashOrThrow(shortUrlService.getHash(hash));
             else
                 post = findPostByHashOrThrow(hash);

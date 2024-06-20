@@ -1,7 +1,7 @@
 package org.example.pastebin.services;
 
 import lombok.AllArgsConstructor;
-import org.example.pastebin.utill.exceptions.NotFoundException;
+import org.example.pastebin.exceptions.NotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;

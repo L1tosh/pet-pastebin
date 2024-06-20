@@ -1,4 +1,4 @@
-package org.example.pastebin.seqcurity;
+package org.example.pastebin.security;
 
 import org.example.pastebin.model.Person;
 import org.springframework.security.core.GrantedAuthority;

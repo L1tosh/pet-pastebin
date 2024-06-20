@@ -1,9 +1,8 @@
-package org.example.pastebin.services;
+package org.example.pastebin.security;
 
 import lombok.AllArgsConstructor;
 import org.example.pastebin.model.Person;
 import org.example.pastebin.repositories.PeopleRepository;
-import org.example.pastebin.seqcurity.PersonDetails;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -13,7 +12,7 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
-public class PersonDetailService implements UserDetailsService {
+public class PersonDetailsService implements UserDetailsService {
 
     private final PeopleRepository peopleRepository;
 

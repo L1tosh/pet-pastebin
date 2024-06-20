@@ -1,8 +1,6 @@
-package org.example.pastebin.config;
+package org.example.pastebin.security;
 
 import lombok.AllArgsConstructor;
-import org.example.pastebin.services.PersonDetailService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,13 +14,10 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@AllArgsConstructor
 public class SecurityConfiguration {
-    private final PersonDetailService personDetailService;
 
-    @Autowired
-    public SecurityConfiguration(PersonDetailService personDetailService) {
-        this.personDetailService = personDetailService;
-    }
+    private final PersonDetailsService personDetailsService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -49,7 +44,7 @@ public class SecurityConfiguration {
     @Bean
     public AuthenticationManager authenticationManager() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(personDetailService);
+        authenticationProvider.setUserDetailsService(personDetailsService);
         authenticationProvider.setPasswordEncoder(getPasswordEncoder());
 
         return new ProviderManager(authenticationProvider);
