@@ -56,12 +56,12 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    public RedisService<String, Post> redisServiceToPostsService(RedisTemplate<String, String> redisTemplate, ObjectMapper objectMapper) {
+    public RedisService<String, Post> redisService(RedisTemplate<String, String> redisTemplate, ObjectMapper objectMapper) {
         return new RedisService<>(redisTemplate, objectMapper, Post.class);
     }
 
-//    @Bean
-//    public RedisService<String, String> redisServiceToShortUrlService(RedisTemplate<String, String> redisTemplate, ObjectMapper objectMapper) {
-//        return new RedisService<>(redisTemplate, objectMapper, String.class);
-//    }
+    @Bean
+    public RedisService<String, String> redisServiceShortUrl(RedisTemplate<String, String> redisTemplate, ObjectMapper objectMapper) {
+        return new RedisService<>(redisTemplate, objectMapper, String.class);
+    }
 }

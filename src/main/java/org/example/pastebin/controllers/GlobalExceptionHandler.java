@@ -12,7 +12,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {Exception.class})
     public ModelAndView handleAnyException(Exception ex, HttpServletRequest request) {
         ModelAndView modelAndView = new ModelAndView();
-        modelAndView.addObject("exception", ex);
+        modelAndView.addObject("exception", ex.toString());
         modelAndView.addObject("url", request.getRequestURL());
         modelAndView.setViewName("error");
         return modelAndView;

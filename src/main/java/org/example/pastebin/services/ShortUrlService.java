@@ -1,13 +1,16 @@
 package org.example.pastebin.services;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.example.pastebin.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -17,16 +20,17 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-//@PropertySource("classpath:service.properties")
+@PropertySource("classpath:service.properties")
 public class ShortUrlService {
 
+    private final ObjectMapper objectMapper;
     private final RestTemplate restTemplate;
-    //private final RedisService<String, String> redisService;
+    private final RedisService<String, String> redisServiceShortUrl;
 
-//    @Value("${service.generator-short-url.username}")
-//    private String username;
-//    @Value("${service.generator-short-url.password}")
-//    private String password;
+    @Value("${service.generator-short-url.username}")
+    private String username;
+    @Value("${service.generator-short-url.password}")
+    private String password;
 
     private static final String TOKEN_KEY = "jwtToken";
 
@@ -43,19 +47,33 @@ public class ShortUrlService {
         return getForEntity(SHORT_URL_GET, String.class, key);
     }
 
-    public Boolean deleteShortUrl(String key) {
-        return postForEntity(SHORT_URL_DELETE, key, Boolean.class);
+    public void deleteShortUrl(String key) {
+        var entity = new HttpEntity<>(key, getDefaultHeaders());
+        restTemplate.postForLocation(SHORT_URL_DELETE, entity);
     }
 
-//    public String login() {
-////        Map<String, String> request = new HashMap<>();
-////        request.put("username", username);
-////        request.put("password", password);
-////
-////        var jwtToken = postForEntity(SHORT_URL_LOGIN, request, String.class);
-//       // redisService.saveWithTTL(TOKEN_KEY, jwtToken, Duration.ofDays(1).getSeconds());
-//        return jwtToken;
-//    }
+    public String login() {
+        Map<String, String> request = new HashMap<>();
+        request.put("username", username);
+        request.put("password", password);
+
+        ResponseEntity<String> response = restTemplate.postForEntity(SHORT_URL_LOGIN, request, String.class);
+
+        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+            LoginResponse loginResponse;
+            try {
+                loginResponse = objectMapper.readValue(response.getBody(), LoginResponse.class);
+            } catch (Exception e) {
+                throw new RuntimeException("Error parsing login response", e);
+            }
+
+            String token = loginResponse.getAccessToken();
+            redisServiceShortUrl.saveWithTTL(TOKEN_KEY, token, Duration.ofDays(1).getSeconds());
+            return token;
+        } else {
+            throw new NotFoundException("Resource not found for URL");
+        }
+    }
 
     private <T> T getForEntity(String url, Class<T> responseType, Object... uriVariables) {
         var entity = new HttpEntity<>(getDefaultHeaders());
@@ -79,17 +97,23 @@ public class ShortUrlService {
 
     private HttpHeaders getDefaultHeaders() {
         var headers = new HttpHeaders();
-
         headers.set("Authorization", "Bearer " + getToken());
-
         return headers;
     }
 
     private String getToken() {
-        String token =  "ad";//redisService.get(TOKEN_KEY);
+        String token = redisServiceShortUrl.get(TOKEN_KEY);
         if (token == null) {
-           // token = login();
+            token = login();
         }
         return token;
+    }
+
+    @Setter
+    @Getter
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class LoginResponse {
+        @JsonProperty("accessToken")
+        private String accessToken;
     }
 }
