@@ -3,15 +3,18 @@ package org.example.pastebin.services;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.example.pastebin.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
@@ -27,37 +30,58 @@ public class ShortUrlService {
     private final RestTemplate restTemplate;
     private final RedisService<String, String> redisServiceShortUrl;
 
-    @Value("${service.generator-short-url.username}")
-    private String username;
-    @Value("${service.generator-short-url.password}")
-    private String password;
+    @Value("${service.generator-short-url.username}") private String username;
+    @Value("${service.generator-short-url.password}") private String password;
 
     private static final String TOKEN_KEY = "jwtToken";
 
-    private static final String SHORT_URL_CREATE = "http://localhost:8081/api/create";
-    private static final String SHORT_URL_GET = "http://localhost:8081/api/get?shortUrl={key}";
-    private static final String SHORT_URL_DELETE = "http://localhost:8081/api/delete";
-    private static final String SHORT_URL_LOGIN = "http://localhost:8081/api/auth/login";
+    @Value("${service.url.create}") private String SHORT_URL_CREATE;
+    @Value("${service.url.get}") private String SHORT_URL_GET;
+    @Value("${service.url.delete}") private String SHORT_URL_DELETE;
+    @Value("${service.url.login}") private String SHORT_URL_LOGIN;
+
 
     public String createShortUrl(String key) {
-        return postForEntity(SHORT_URL_CREATE, key, String.class);
+        var entity = new HttpEntity<>(key, getDefaultHeaders());
+        var response =
+                restTemplate.exchange(SHORT_URL_CREATE, HttpMethod.POST, entity, String.class);
+
+        return getResponseBody(response);
     }
 
     public String getHash(String key) {
-        return getForEntity(SHORT_URL_GET, String.class, key);
+        var entity = new HttpEntity<>(getDefaultHeaders());
+        var response =
+                restTemplate.exchange(SHORT_URL_GET, HttpMethod.GET, entity, String.class, key);
+
+        return getResponseBody(response);
     }
 
     public void deleteShortUrl(String key) {
         var entity = new HttpEntity<>(key, getDefaultHeaders());
-        restTemplate.postForLocation(SHORT_URL_DELETE, entity);
+        try {
+            restTemplate.exchange(SHORT_URL_DELETE, HttpMethod.DELETE, entity, Void.class);
+        } catch (HttpClientErrorException.NotFound e) {
+            System.out.println("Short utl not found or not exist");
+        }
     }
 
-    public String login() {
+    private static <T> T getResponseBody(ResponseEntity<T> response) {
+        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+            return response.getBody();
+        } else {
+            throw new NotFoundException("Resource not found");
+        }
+    }
+
+    private String login() {
         Map<String, String> request = new HashMap<>();
         request.put("username", username);
         request.put("password", password);
 
-        ResponseEntity<String> response = restTemplate.postForEntity(SHORT_URL_LOGIN, request, String.class);
+        var response =
+                restTemplate.postForEntity(SHORT_URL_LOGIN, request, String.class);
+
 
         if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
             LoginResponse loginResponse;
@@ -72,26 +96,6 @@ public class ShortUrlService {
             return token;
         } else {
             throw new NotFoundException("Resource not found for URL");
-        }
-    }
-
-    private <T> T getForEntity(String url, Class<T> responseType, Object... uriVariables) {
-        var entity = new HttpEntity<>(getDefaultHeaders());
-        ResponseEntity<T> response = restTemplate.exchange(url, HttpMethod.GET, entity, responseType, uriVariables);
-        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-            return response.getBody();
-        } else {
-            throw new NotFoundException("Resource not found for URL: " + url);
-        }
-    }
-
-    private <T> T postForEntity(String url, Object request, Class<T> responseType) {
-        var entity = new HttpEntity<>(request, getDefaultHeaders());
-        ResponseEntity<T> response = restTemplate.exchange(url, HttpMethod.POST, entity, responseType);
-        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-            return response.getBody();
-        } else {
-            throw new NotFoundException("Resource not found for URL: " + url);
         }
     }
 
@@ -112,7 +116,7 @@ public class ShortUrlService {
     @Setter
     @Getter
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class LoginResponse {
+    private static class LoginResponse {
         @JsonProperty("accessToken")
         private String accessToken;
     }

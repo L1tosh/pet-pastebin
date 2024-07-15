@@ -24,11 +24,11 @@
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
         <input class="form__field" type="submit" value="UPDATE">
     </form>
-    <form th:action="@{/post/{hash}/delete(hash=${post.hash})}" th:method="POST" class="form__group field">
+    <form th:action="@{/post/{hash}(hash=${post.hash})}" th:method="DELETE" class="form__group field">
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
         <input class="form__field" type="submit" value="DELETE">
     </form>
-    <form th:action="@{/post/{hash}/create-short-url(hash=${post.hash})}" th:method="POST" class="form__group field">
+    <form th:action="@{/post/{hash}/generate(hash=${post.hash})}" th:method="POST" class="form__group field">
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
         <input class="form__field" type="submit" value="GET SHORT URL">
     </form>

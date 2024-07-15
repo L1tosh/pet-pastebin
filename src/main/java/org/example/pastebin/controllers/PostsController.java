@@ -32,7 +32,7 @@ public class PostsController {
     private final PostValidator postValidator;
     private final ModelMapper modelMapper;
 
-    @GetMapping
+    @GetMapping({"", "/"})
     public String showMainPage() {
         return "posts/main";
     }
@@ -87,7 +87,7 @@ public class PostsController {
         return String.format("redirect:/post/%s", hash);
     }
 
-    @PostMapping("/{hash}/edit")
+    @PutMapping("/{hash}")
     public String updatePost(@PathVariable("hash") String hash,
                              @ModelAttribute("post") @Valid PostDTO postDTO, BindingResult bindingResult) {
         postValidator.validate(mapDtoToPost(postDTO), bindingResult);
@@ -100,7 +100,7 @@ public class PostsController {
         return String.format("redirect:/post/%s", newHash);
     }
 
-    @PostMapping("/{hash}/delete")
+    @DeleteMapping("/{hash}")
     public String deletePost(@PathVariable("hash") String hash) {
         postsService.deletePost(hash);
         return "redirect:/post";
@@ -121,7 +121,7 @@ public class PostsController {
         return String.format("redirect:/post/%s", hash);
     }
 
-    @PostMapping("/{hash}/create-short-url")
+    @PostMapping("/{hash}/generate")
     public String createShortUrl(@PathVariable("hash") String hash, Model model) {
         model.addAttribute("shortUrl", shortUrlService.createShortUrl(hash));
         return "posts/short-url";
